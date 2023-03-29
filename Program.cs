@@ -37,8 +37,10 @@ app.MapPut(
         if (result == null) {
             return Results.NotFound();
         }
-        result.IsDone = isDone;
-        await repository.SaveTodo(result);
+        if (result.IsDone != isDone) {
+            result.IsDone = isDone;
+            await repository.SaveTodo(result);
+        }
         return Results.NoContent(); 
     }
 );
