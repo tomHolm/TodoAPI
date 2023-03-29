@@ -30,5 +30,17 @@ app.MapPost(
         return Results.Created<Todo>($"/todo/{result.Id}", result);
     }
 );
+app.MapPut(
+    "/todo/{id}",
+    async (ITodoRepository repository, int id, bool isDone) => {
+        var result = await repository.GetTodo(id);
+        if (result == null) {
+            return Results.NotFound();
+        }
+        result.IsDone = isDone;
+        await repository.SaveTodo(result);
+        return Results.NoContent(); 
+    }
+);
 
 app.Run();

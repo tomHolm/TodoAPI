@@ -21,8 +21,15 @@ public class TodoRepository: ITodoRepository {
         if (dueDate.HasValue) {
             todo.DueDate = dueDate.Value;
         }
-        var result = db.Add(todo);
-        await db.SaveChangesAsync();
+        var result = this.db.Add(todo);
+        await this.db.SaveChangesAsync();
         return result.Entity;
+    }
+
+    public async Task<bool> SaveTodo(Todo todo)
+    {
+        this.db.Update<Todo>(todo);
+        var result = await this.db.SaveChangesAsync();
+        return result > 0;
     }
 }
