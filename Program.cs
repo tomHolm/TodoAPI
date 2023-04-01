@@ -31,17 +31,33 @@ app.MapPost(
     }
 );
 app.MapPut(
+    "/todo",
+    async (ITodoRepository repository, Todo todo) => {
+        var result = await repository.SaveTodo(todo);
+        return result
+            ? Results.NoContent()
+            : Results.NotFound(); 
+    }
+);
+app.MapDelete(
     "/todo/{id}",
-    async (ITodoRepository repository, int id, bool isDone) => {
-        var result = await repository.GetTodo(id);
-        if (result == null) {
-            return Results.NotFound();
-        }
-        if (result.IsDone != isDone) {
-            result.IsDone = isDone;
-            await repository.SaveTodo(result);
-        }
-        return Results.NoContent(); 
+    async (ITodoRepository repository, int id) => {
+        var result = await repository.DeleteTodo(id);
+        return result
+            ? Results.NoContent()
+            : Results.NotFound();
+    }
+);
+app.MapGet(
+    "/todo/list",
+    async (ITodoRepository repository) => {
+        return Results.Ok(await repository.GetList());
+    }
+);
+app.MapGet(
+    "/todo/list/{isDone}",
+    async (ITodoRepository repository, bool isDone) => {
+        return Results.Ok(await repository.GetList(isDone));
     }
 );
 

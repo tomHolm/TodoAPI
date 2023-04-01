@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TodoAPI.DB;
 
 namespace TodoAPI.Repository;
@@ -31,5 +32,18 @@ public class TodoRepository: ITodoRepository {
         this.db.Update<Todo>(todo);
         var result = await this.db.SaveChangesAsync();
         return result > 0;
+    }
+
+    public async Task<bool> DeleteTodo(int id)
+    {
+        int result = await this.db.Database.ExecuteSqlAsync($"DELETE * FROM todos WHERE id = {id}");
+        return result > 0;
+    }
+
+    public async Task<IEnumerable<Todo>> GetList(bool? isDone = null)
+    {
+        return isDone == null
+            ? await this.db.Todos.ToListAsync<Todo>()
+            : this.db.Todos.Where<Todo>(todo => todo.IsDone == isDone).ToList();
     }
 }
