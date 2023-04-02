@@ -1,6 +1,8 @@
 using TodoAPI.DB;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using TodoAPI.Repository;
+using TodoAPI.Params;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
@@ -16,7 +18,7 @@ if (app.Environment.IsDevelopment()) {
 
 app.MapGet(
     "/todo/{id}",
-    async (ITodoRepository repository, int id) => {
+    async (ITodoRepository repository, [FromRoute] int id) => {
         var result = await repository.GetTodo(id);
         return result != null
             ? Results.Ok(result)
@@ -25,14 +27,14 @@ app.MapGet(
 );
 app.MapPost(
     "/todo",
-    async (ITodoRepository repository, string description, DateTime? dueDate) => {
-        var result = await repository.AddTodo(description, dueDate);
+    async (ITodoRepository repository, [FromBody] TodoTemplate todo) => {
+        var result = await repository.AddTodo(todo.Description, todo.DueDate);
         return Results.Created<Todo>($"/todo/{result.Id}", result);
     }
 );
 app.MapPut(
     "/todo",
-    async (ITodoRepository repository, Todo todo) => {
+    async (ITodoRepository repository, [FromBody] Todo todo) => {
         var result = await repository.SaveTodo(todo);
         return result
             ? Results.NoContent()
@@ -41,7 +43,7 @@ app.MapPut(
 );
 app.MapDelete(
     "/todo/{id}",
-    async (ITodoRepository repository, int id) => {
+    async (ITodoRepository repository, [FromBody] int id) => {
         var result = await repository.DeleteTodo(id);
         return result
             ? Results.NoContent()
@@ -50,13 +52,7 @@ app.MapDelete(
 );
 app.MapGet(
     "/todo/list",
-    async (ITodoRepository repository) => {
-        return Results.Ok(await repository.GetList());
-    }
-);
-app.MapGet(
-    "/todo/list/{isDone}",
-    async (ITodoRepository repository, bool isDone) => {
+    async (ITodoRepository repository, bool? isDone) => {
         return Results.Ok(await repository.GetList(isDone));
     }
 );
